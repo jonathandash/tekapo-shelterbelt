@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="jonathandash" />
+
+<meta name="date" content="2018-09-11" />
+
+<title>ground-truth-analysis</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.0.13/css/fa-svg-with-js.css" rel="stylesheet" />
+<script src="site_libs/font-awesome-5.0.13/js/fontawesome-all.min.js"></script>
+<script src="site_libs/font-awesome-5.0.13/js/fa-v4-shims.min.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">tekapo-shelterbelt</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jdblischak/workflowr">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">ground-truth-analysis</h1>
+<h4 class="author"><em>jonathandash</em></h4>
+<h4 class="date"><em>2018-09-11</em></h4>
+
+</div>
+
+
+<p><strong>Last updated:</strong> 2018-09-11</p>
+<strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
+<ul>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>R Markdown file:</strong> up-to-date </summary></p>
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Environment:</strong> empty </summary></p>
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Seed:</strong> <code>set.seed(20180911)</code> </summary></p>
+<p>The command <code>set.seed(20180911)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Session information:</strong> recorded </summary></p>
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/jonathandash/tekapo-shelterbelt/tree/643a31a10a77c31cf2b85d021f1023cfe41a6144" target="_blank">643a31a</a> </summary></p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+<pre><code>
+Ignored files:
+    Ignored:    .Rproj.user/
+    Ignored:    docs/figure/
+
+Unstaged changes:
+    Modified:   .gitignore
+
+</code></pre>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
+</li>
+</ul>
+<details> <summary> <small><strong>Expand here to see past versions:</strong></small> </summary>
+<ul>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+File
+</th>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+<th style="text-align:left;">
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/jonathandash/tekapo-shelterbelt/blob/643a31a10a77c31cf2b85d021f1023cfe41a6144/analysis/ground-truth-analysis.Rmd" target="_blank">643a31a</a>
+</td>
+<td style="text-align:left;">
+jonathandash
+</td>
+<td style="text-align:left;">
+2018-09-11
+</td>
+<td style="text-align:left;">
+Add first ground truth
+</td>
+</tr>
+</tbody>
+</table>
+</ul>
+<p></details></p>
+<hr />
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>This R markdown file will form the start of analysis on the ground truth dataset for the Tekapo study site. This analysis forms part of the draft paper being developed on Overleaf <a href="https://www.overleaf.com/18587357pvxwqknxrpnf#/70031738/" class="uri">https://www.overleaf.com/18587357pvxwqknxrpnf#/70031738/</a>.</p>
+</div>
+<div id="methods-for-inclusion-in-paper" class="section level1">
+<h1>Methods for inclusion in paper</h1>
+<p>Field data was collected at the study site between xx November 2017 and 18 August 2018. The objective of the field survey was to provide a total census of a first order invasion event from a <em>P. sylvestris</em> shelter belt in an open grassland environment. Aerial imagery was used to manually identify the approximate spread fan of the invasion front. This was used to define the boundary for an on ground systematic search of the study area. Excluding the shelter belt all exotic conifers in the area of interest were identified down to a height of 0.05 m. The location of each individual was recorded using a Trimble Geo 7X GNSS unit. At least 100 fixes were recorded for each individual and points were then differentially corrected using a local base station network maintained by Land Information New Zealand (LINZ). In addition to the tree location detailed information on the properties of each tree were measured. The total tree height, diameter at breast height (DBH) for suitable individuals, root collar diameter (RCD), and canopy width were all measured. In addition the species and health status of all trees was noted and the age of each tree was estimated using the number of branch whorls. The objective of this field data collection was to provide ground truth data suitable for developing methods for tree detection of all exotic conifers in the area of interest based on the remotely sensed data available.</p>
+<pre><code>[1] &quot;In the field data dataframe there are 10155 records&quot;</code></pre>
+<pre><code>      FID         spp       alive       ht..cm.            dia1       
+ Min.   :    0   pa :   1   a:9783   Min.   :  2.00   Min.   :  1.00  
+ 1st Qu.: 2540   pd :   1   x: 372   1st Qu.: 25.00   1st Qu.: 16.00  
+ Median : 5092   pm :   2            Median : 54.00   Median : 35.00  
+ Mean   : 5087   pm?:   5            Mean   : 82.18   Mean   : 54.94  
+ 3rd Qu.: 7630   pn :   1            3rd Qu.:120.00   3rd Qu.: 82.00  
+ Max.   :10169   pp :4598            Max.   :476.00   Max.   :360.00  
+                 ps :5547                                             
+      dia2        coning        age            cluster           veg      
+ Min.   :  1.00   n:9722   Min.   : 2.000   Min.   :2.000          :3302  
+ 1st Qu.: 15.00   y: 433   1st Qu.: 4.000   1st Qu.:2.000   t      :1581  
+ Median : 30.00            Median : 4.000   Median :2.000   grass  :1426  
+ Mean   : 50.57            Mean   : 4.839   Mean   :2.409   tuss   :1416  
+ 3rd Qu.: 80.00            3rd Qu.: 5.000   3rd Qu.:3.000   g      :1155  
+ Max.   :300.00            Max.   :10.000   Max.   :9.000   pine   : 646  
+ NA&#39;s   :1                 NA&#39;s   :10093    NA&#39;s   :9092    (Other): 629  
+          comment         Max_PDOP        Max_HDOP    
+              :10137   Min.   :0.900   Min.   :0.500  
+ sampletaken  :    6   1st Qu.:1.700   1st Qu.:0.900  
+ sample       :    5   Median :2.000   Median :1.100  
+ likesampletak:    2   Mean   :2.326   Mean   :1.221  
+ sharpbud     :    2   3rd Qu.:2.700   3rd Qu.:1.300  
+ possybly pm? :    1   Max.   :7.000   Max.   :5.900  
+ (Other)      :    2                                  
+                             Corr_Type               Rcvr_Type    
+ L1  Postprocessed Carrier Float  :    1   Geo 7X (H-Star):10155  
+ L1L2  Postprocessed Carrier Float:10130                          
+ Postprocessed Code               :   24                          
+                                                                  
+                                                                  
+                                                                  
+                                                                  
+            GPS_Date          GPS_Time     Update_Sta     Feat_Name    
+ 16/05/2018 0:00: 611   10:01:55am:    6   New:10155   Point_ge:10155  
+ 15/05/2018 0:00: 602   04:00:36pm:    4                               
+ 17/05/2018 0:00: 552   08:31:04am:    4                               
+ 15/02/2018 0:00: 526   08:49:08am:    4                               
+ 13/02/2018 0:00: 509   10:13:43am:    4                               
+ 14/02/2018 0:00: 475   10:49:38am:    4                               
+ (Other)        :6880   (Other)   :10129                               
+                 Datafile      Unfilt_Pos        Filt_Pos     
+ TEKAPO 1.cor        : 290   Min.   : 15.00   Min.   : 15.00  
+ TEKAPO WLDING 2.cor :1689   1st Qu.: 26.00   1st Qu.: 26.00  
+ TEKAPO_WILDING_20180:4249   Median : 40.00   Median : 40.00  
+ TEKAPO2.cor         :1801   Mean   : 38.01   Mean   : 38.01  
+ TEKAPOWILDINGS3.cor :2070   3rd Qu.: 42.00   3rd Qu.: 42.00  
+ TEST5.cor           :   2   Max.   :309.00   Max.   :309.00  
+ TW4.cor             :  54                                    
+   Data_Dicti       GPS_Week      GPS_Second       GNSS_Heigh    
+ Generic:10155   Min.   :1986   Min.   : 89014   Min.   : 19.41  
+                 1st Qu.:2000   1st Qu.:181967   1st Qu.:810.98  
+                 Median :2001   Median :262443   Median :813.47  
+                 Mean   :2001   Mean   :265988   Mean   :813.56  
+                 3rd Qu.:2007   3rd Qu.:341749   3rd Qu.:816.50  
+                 Max.   :2013   Max.   :522868   Max.   :819.19  
+                                                                 
+   Vert_Prec        Horz_Prec         Std_Dev             Northing      
+ Min.   :0.1000   Min.   :0.1000   Min.   :0.000e+00   Min.   :5126239  
+ 1st Qu.:0.1000   1st Qu.:0.1000   1st Qu.:0.000e+00   1st Qu.:5126362  
+ Median :0.1000   Median :0.1000   Median :0.000e+00   Median :5126456  
+ Mean   :0.1012   Mean   :0.1001   Mean   :9.847e+10   Mean   :5126463  
+ 3rd Qu.:0.1000   3rd Qu.:0.1000   3rd Qu.:0.000e+00   3rd Qu.:5126533  
+ Max.   :0.4000   Max.   :0.3000   Max.   :1.000e+15   Max.   :5180023  
+                                                                        
+    Easting           Point_ID       Offset       
+ Min.   :1386481   Min.   :   1.0   Mode:logical  
+ 1st Qu.:1386566   1st Qu.: 167.0   NA&#39;s:10155    
+ Median :1386604   Median : 386.0                 
+ Mean   :1386641   Mean   : 615.3                 
+ 3rd Qu.:1386647   3rd Qu.:1008.0                 
+ Max.   :1568357   Max.   :2070.0                 
+                                                  </code></pre>
+<p>Of the 10155 trees assessed only 433 were coning. The table below summarises the tree biometry recorded. This still needs to be cleaned up. Consider calculating canopy volume based on crown width, the assumption that the canopy continues to the floor and and assumed parabolic canopy shape. Keep thinking about whether this is useful. Could be interesting to validate this against alpha shapes from the ALS as this could guide spraying?</p>
+<table>
+<caption>Summary of the field measured trees. Canopy with (CW) is calculated as D1+D2/2</caption>
+<thead>
+<tr class="header">
+<th align="left">spp</th>
+<th align="left">alive</th>
+<th align="right">n</th>
+<th align="right">H</th>
+<th align="right">D1</th>
+<th align="right">D2</th>
+<th align="right">CW</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">pa</td>
+<td align="left">a</td>
+<td align="right">1</td>
+<td align="right">256.00000</td>
+<td align="right">190.00000</td>
+<td align="right">170.00000</td>
+<td align="right">275.00000</td>
+</tr>
+<tr class="even">
+<td align="left">pd</td>
+<td align="left">a</td>
+<td align="right">1</td>
+<td align="right">370.00000</td>
+<td align="right">210.00000</td>
+<td align="right">210.00000</td>
+<td align="right">315.00000</td>
+</tr>
+<tr class="odd">
+<td align="left">pm</td>
+<td align="left">a</td>
+<td align="right">2</td>
+<td align="right">26.00000</td>
+<td align="right">35.50000</td>
+<td align="right">32.00000</td>
+<td align="right">51.50000</td>
+</tr>
+<tr class="even">
+<td align="left">pm?</td>
+<td align="left">a</td>
+<td align="right">5</td>
+<td align="right">32.40000</td>
+<td align="right">29.40000</td>
+<td align="right">27.00000</td>
+<td align="right">42.90000</td>
+</tr>
+<tr class="odd">
+<td align="left">pn</td>
+<td align="left">a</td>
+<td align="right">1</td>
+<td align="right">24.00000</td>
+<td align="right">14.00000</td>
+<td align="right">12.00000</td>
+<td align="right">20.00000</td>
+</tr>
+<tr class="even">
+<td align="left">pp</td>
+<td align="left">a</td>
+<td align="right">4342</td>
+<td align="right">45.89567</td>
+<td align="right">29.46039</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+</tr>
+<tr class="odd">
+<td align="left">pp</td>
+<td align="left">x</td>
+<td align="right">256</td>
+<td align="right">54.40625</td>
+<td align="right">34.44141</td>
+<td align="right">22.60547</td>
+<td align="right">45.74414</td>
+</tr>
+<tr class="even">
+<td align="left">ps</td>
+<td align="left">a</td>
+<td align="right">5431</td>
+<td align="right">112.76487</td>
+<td align="right">76.46842</td>
+<td align="right">71.00331</td>
+<td align="right">111.97008</td>
+</tr>
+<tr class="odd">
+<td align="left">ps</td>
+<td align="left">x</td>
+<td align="right">116</td>
+<td align="right">69.00862</td>
+<td align="right">45.43966</td>
+<td align="right">30.81897</td>
+<td align="right">60.84914</td>
+</tr>
+</tbody>
+</table>
+<p>Check the spatial distribution of the trees. This shows thatsome of the points are in the wrong place. two points are in completely the wrong place. This was most likely a trial in Chch and will be safely removed with a simple filter <code>df&lt;-subset(df,Northing&gt;5160000)</code>.</p>
+<p><img src="figure/ground-truth-analysis.Rmd/grahing-1.png" width="672" style="display: block; margin: auto;" /><img src="figure/ground-truth-analysis.Rmd/grahing-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Think about plotting the tree size distributions and relationships for additional insight.</p>
+<pre><code>Picking joint bandwidth of 7.31</code></pre>
+<p><img src="figure/ground-truth-analysis.Rmd/distributions-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>Warning: Removed 1 rows containing non-finite values (stat_density2d).</code></pre>
+<pre><code>Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+<p><img src="figure/ground-truth-analysis.Rmd/distributions-2.png" width="672" style="display: block; margin: auto;" /></p>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.5.1 (2018-07-02)
+Platform: x86_64-w64-mingw32/x64 (64-bit)
+Running under: Windows 10 x64 (build 14393)
+
+Matrix products: default
+
+locale:
+[1] LC_COLLATE=English_New Zealand.1252 
+[2] LC_CTYPE=English_New Zealand.1252   
+[3] LC_MONETARY=English_New Zealand.1252
+[4] LC_NUMERIC=C                        
+[5] LC_TIME=English_New Zealand.1252    
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+ [1] bindrcpp_0.2.2  ggjoy_0.4.1     ggridges_0.5.0  knitr_1.20     
+ [5] forcats_0.3.0   stringr_1.3.1   dplyr_0.7.6     purrr_0.2.5    
+ [9] readr_1.1.1     tidyr_0.8.1     tibble_1.4.2    ggplot2_3.0.0  
+[13] tidyverse_1.2.1 here_0.1       
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_0.12.17      lubridate_1.7.4   lattice_0.20-35  
+ [4] assertthat_0.2.0  rprojroot_1.3-2   digest_0.6.15    
+ [7] psych_1.8.4       R6_2.2.2          cellranger_1.1.0 
+[10] plyr_1.8.4        backports_1.1.2   evaluate_0.10.1  
+[13] httr_1.3.1        highr_0.7         pillar_1.3.0     
+[16] rlang_0.2.1       lazyeval_0.2.1    readxl_1.1.0     
+[19] rstudioapi_0.7    whisker_0.3-2     R.utils_2.6.0    
+[22] R.oo_1.22.0       rmarkdown_1.10    labeling_0.3     
+[25] foreign_0.8-70    munsell_0.5.0     broom_0.4.5      
+[28] compiler_3.5.1    modelr_0.1.2      pkgconfig_2.0.1  
+[31] mnormt_1.5-5      htmltools_0.3.6   tidyselect_0.2.4 
+[34] workflowr_1.1.1   viridisLite_0.3.0 crayon_1.3.4     
+[37] withr_2.1.2       MASS_7.3-50       R.methodsS3_1.7.1
+[40] grid_3.5.1        nlme_3.1-137      jsonlite_1.5     
+[43] gtable_0.2.0      git2r_0.23.0      magrittr_1.5     
+[46] scales_0.5.0      cli_1.0.0         stringi_1.1.7    
+[49] reshape2_1.4.3    xml2_1.2.0        tools_3.5.1      
+[52] glue_1.2.0        hms_0.4.2         parallel_3.5.1   
+[55] yaml_2.1.19       colorspace_1.3-2  rvest_0.3.2      
+[58] bindr_0.1.1       haven_1.1.2      </code></pre>
+</div>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+  This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a>
+  analysis was created with
+  <a href="https://github.com/jdblischak/workflowr">workflowr</a> 1.1.1
+</p>
+<hr>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
