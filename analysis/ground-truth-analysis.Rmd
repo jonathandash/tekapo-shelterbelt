@@ -1,0 +1,92 @@
+---
+title: "ground-truth-analysis"
+author: "jonathandash"
+date: "2018-09-11"
+output: workflowr::wflow_html
+---
+
+## Introduction
+
+This R markdown file will form the start of analysis on the ground truth dataset for the Tekapo study site. This analysis forms part of the draft paper being developed on Overleaf https://www.overleaf.com/18587357pvxwqknxrpnf#/70031738/.
+
+# Methods for inclusion in paper
+Field data was collected at the study site between xx November 2017 and 18 August 2018. The objective of the field survey was to provide a total census of a first order invasion event from a *P. sylvestris* shelter belt in an open grassland environment. Aerial imagery was used to manually identify the approximate spread fan of the invasion front. This was used to define the boundary for an on ground systematic search of the study area. Excluding the shelter belt all exotic conifers in the area of interest were identified down to a height of 0.05 m. The location of each individual was recorded using a Trimble Geo 7X GNSS unit. At least 100 fixes were recorded for each individual and points were then differentially corrected using a local base station network maintained by Land Information New Zealand (LINZ). In addition to the tree location detailed information on the properties of each tree were measured. The total tree height, diameter at breast height (DBH) for suitable individuals, root collar diameter (RCD), and canopy width were all measured. In addition the species and health status of all trees was noted and the age of each tree was estimated using the number of branch whorls. The objective of this field data collection was to provide ground truth data suitable for developing methods for tree detection of all exotic conifers in the area of interest based on the remotely sensed data available. 
+
+```{r, set libraries, echo=FALSE, message =FALSE}
+library(here)
+library(tidyverse)
+library(knitr)
+library(ggjoy)
+```
+
+```{r, read data, echo=FALSE, message =FALSE}
+df<-read.csv(here('data', 'Full data_clean_Aug18.csv'))
+
+paste('In the field data dataframe there are ', nrow(df), ' records', sep= '')
+
+summary(df)
+
+```
+
+Of the  `r nrow(df)` trees assessed only 433 were coning. The table below summarises the tree biometry recorded. This still needs to be cleaned up. Consider calculating canopy volume based on crown width, the assumption that the canopy continues to the floor and and assumed parabolic canopy shape. Keep thinking about whether this is useful. Could be interesting to validate this against alpha shapes from the ALS as this could guide spraying?
+
+```{r, summarise, echo=FALSE, message =FALSE}
+
+kable( df %>% group_by(spp, alive) %>%
+  summarise(n=length(spp),
+            H = mean(ht..cm.),
+            D1 = mean(dia1),
+            D2 = mean(dia2),
+            CW = mean(dia1) + mean(dia2)/2), caption = 'Summary of the field measured trees. Canopy with (CW) is calculated as D1+D2/2')
+
+```
+
+Check the spatial distribution of the trees. This shows thatsome of the points are in the wrong place. two points are in completely the wrong place. This was most likely a trial in Chch and will be safely removed with a simple filter `df<-subset(df,Northing>5160000) `. 
+
+```{r, grahing, echo = FALSE, fig.width = 7, fig.height = 7}
+df %>% filter(Northing <5160000) %>%
+ggplot(aes(Northing, Easting, colour=ht..cm.)) +
+  geom_point() +
+  theme_bw() +
+  scale_colour_viridis_c()
+
+df %>% filter(Northing <5160000,
+              spp %in% c('pp','ps')) %>%
+ggplot(aes(Northing, Easting, colour=as.factor(spp))) +
+  geom_point(alpha=0.2) +
+  theme_bw() +
+  scale_colour_viridis_d()
+
+
+```
+
+
+
+Think about plotting the tree size distributions and relationships for additional insight.
+
+```{r, distributions, echo = FALSE, warnings=FALSE, fig.width = 7, fig.height = 7}
+
+df %>% filter(Northing <5160000,
+              spp %in% c('ps', 'pp', 'pm?')) %>%
+ggplot(aes(x=ht..cm., y=spp, height=..density.., fill = spp)) +
+    scale_fill_viridis_d() +
+    geom_vline(xintercept = 0, col = "grey70") +
+    geom_joy(col = "grey70", scale = 2.4, show.legend = F) +
+    theme_bw()
+
+
+df %>% filter(Northing <5160000,
+              spp %in% c('ps', 'pp', 'pm?')) %>%
+ggplot(aes(y=ht..cm., x = (dia1 + dia2)/2)) +
+  geom_point(alpha=0.5, col='grey')  +
+  stat_density2d(aes(fill = ..level..),n = 100,contour = TRUE,geom = "polygon", alpha=0.2) +
+  scale_fill_viridis_c() +
+  labs(x='Crown Width (cm)', y='Height (cm)', colour='Species') +
+  theme_bw() +
+  theme(legend.position="none") 
+
+
+```
+
+
+

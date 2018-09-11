@@ -7,3 +7,5 @@ output:
 ---
 
 Welcome to my research website.
+
+Click on this [link](ground-truth-analysis.html) to see a summary of the field data.
