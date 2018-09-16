@@ -45,17 +45,28 @@ Check the spatial distribution of the trees. This shows thatsome of the points a
 
 ```{r, grahing, echo = FALSE, fig.width = 7, fig.height = 7}
 df %>% filter(Northing <5160000) %>%
-ggplot(aes(Northing, Easting, colour=ht..cm.)) +
+ggplot(aes(y=Northing, x=Easting, colour=ht..cm.)) +
   geom_point() +
   theme_bw() +
   scale_colour_viridis_c()
 
 df %>% filter(Northing <5160000,
               spp %in% c('pp','ps')) %>%
-ggplot(aes(Northing, Easting, colour=as.factor(spp))) +
+ggplot(aes(y=Northing, x=Easting, colour=as.factor(spp))) +
   geom_point(alpha=0.2) +
   theme_bw() +
   scale_colour_viridis_d()
+
+
+df %>% mutate(CW = (dia1 + dia2)/2) %>% 
+  filter(Northing <5160000,
+              spp %in% c('pp','ps')) %>%
+ggplot(aes(y=Northing, x=Easting, colour=as.factor(spp), size = CW)) +
+  geom_point(alpha=0.2) +
+  theme_bw() +
+  scale_colour_brewer(palette='Set2') +
+  scale_fill_brewer(palette='Set2') +
+  labs(colour='Species', Size = 'Crown Width')
 
 
 ```
